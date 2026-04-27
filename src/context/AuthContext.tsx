@@ -27,7 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = () => {
     // Redirect to backend OAuth endpoint
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const backendUrl = import.meta.env.VITE_API_URL || 'https://insighta-backend-hurstin6975-vqh74ndl.leapcell.dev';
     window.location.href = `${backendUrl}/v1/auth/github`;
   };
 

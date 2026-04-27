@@ -47,7 +47,11 @@ A premium React-based demographic intelligence portal for managing and analyzing
 3. Configure environment variables:
    Create a `.env` file in the root directory:
    ```dotenv
-   VITE_API_URL=http://localhost:3000
+   # Live backend (default)
+   VITE_API_URL=https://insighta-backend-hurstin6975-vqh74ndl.leapcell.dev
+
+   # Local development (optional override)
+   # VITE_API_URL=http://localhost:3000
    ```
 
 4. Start the development server:
