@@ -9,11 +9,9 @@ import {
 import RoleGate from '../components/auth/RoleGate';
 
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { user, isLoading, verifySession } = useAuth();
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     // Explicitly verify session when hitting the dashboard after a redirect
