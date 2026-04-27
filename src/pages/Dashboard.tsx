@@ -8,7 +8,27 @@ import {
 } from 'lucide-react';
 import RoleGate from '../components/auth/RoleGate';
 
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+
 const Dashboard: React.FC = () => {
+  const { user, isLoading, verifySession } = useAuth();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    // Explicitly verify session when hitting the dashboard after a redirect
+    if (!user && !isLoading) {
+      verifySession();
+    }
+  }, [user, isLoading, verifySession]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-96 w-full items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
   const stats = [
     { label: 'Total Profiles', value: '12,842', icon: Users, color: 'text-blue-500' },
     { label: 'Intelligence Queries', value: '45.2k', icon: Search, color: 'text-purple-500' },

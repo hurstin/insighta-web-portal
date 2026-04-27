@@ -22,6 +22,11 @@ const App: React.FC = () => {
           {/* Protected Routes Wrapper */}
           <Route
             path="/"
+            element={<Navigate to="/dashboard" replace />}
+          />
+
+          <Route
+            path="/dashboard"
             element={
               <ProtectedRoute>
                 <Layout>
