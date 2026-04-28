@@ -11,6 +11,7 @@ import {
 import { Link } from 'react-router-dom';
 import RoleGate from '../components/auth/RoleGate';
 import { cn } from '../utils/cn';
+import api from '../api/client';
 
 interface Profile {
   id: string;
@@ -32,26 +33,46 @@ const ProfilesList: React.FC = () => {
   const fetchProfiles = useCallback(async () => {
     try {
       setIsLoading(true);
-      // In a real app: const response = await api.get(`/profiles?page=${page}&search=${search}`);
-      // Mocking for now
-      setTimeout(() => {
-        const mockData: Profile[] = Array.from({ length: 10 }).map((_, i) => ({
-          id: `PROF-${2000 + i + (page - 1) * 10}`,
-          name: `User ${2000 + i}`,
-          email: `user${2000 + i}@example.com`,
-          location: i % 2 === 0 ? 'San Francisco, CA' : 'New York, NY',
-          industry: i % 3 === 0 ? 'Technology' : 'Finance',
-          intelligenceScore: 75 + (i % 25),
-          status: i % 10 === 9 ? 'Pending' : 'Matched',
-        }));
-        setProfiles(mockData);
-        setIsLoading(false);
-      }, 500);
+      
+      const endpoint = search ? '/v1/profiles/search' : '/v1/profiles';
+      const params = search 
+        ? { q: search, page, limit: 10 }
+        : { page, limit: 10, sort_by: 'age', order: 'DESC' };
+
+      const response = await api.get(endpoint, { params });
+      
+      const mappedData: Profile[] = response.data.data.map((p: any) => ({
+        id: p.id,
+        name: p.name || 'Anonymous User',
+        email: p.email || `${p.username}@github.com`,
+        location: p.country_id || 'Unknown',
+        industry: p.age_group || 'N/A',
+        intelligenceScore: Math.floor(p.gender_probability * 100),
+        status: 'Matched',
+      }));
+
+      setProfiles(mappedData);
+      setIsLoading(false);
     } catch (error) {
       console.error('Failed to fetch profiles:', error);
       setIsLoading(false);
     }
-  }, [page]);
+  }, [page, search]);
+
+  const handleExport = async () => {
+    try {
+      const response = await api.get('/v1/profiles/export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'profiles_export.csv');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
 
   useEffect(() => {
     fetchProfiles();
@@ -65,7 +86,10 @@ const ProfilesList: React.FC = () => {
           <p className="text-muted-foreground">Manage and analyze discovered demographic data.</p>
         </div>
         <RoleGate allowedRoles={['ADMIN']}>
-          <button className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-opacity">
+          <button 
+            onClick={handleExport}
+            className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition-opacity"
+          >
             <Download className="h-4 w-4" />
             Export CSV
           </button>

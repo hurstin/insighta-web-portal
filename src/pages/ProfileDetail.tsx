@@ -10,6 +10,7 @@ import {
   BarChart3,
   Calendar
 } from 'lucide-react';
+import api from '../api/client';
 
 const ProfileDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,32 +18,36 @@ const ProfileDetail: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Mocking fetch
-    setTimeout(() => {
-      setProfile({
-        id,
-        name: 'Sarah Anderson',
-        email: 'sarah.a@tech-corp.io',
-        location: 'San Francisco, CA',
-        industry: 'Software Engineering',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
-        role: 'Senior Engineering Manager',
-        score: 98,
-        discoveredAt: '2026-04-20T10:30:00Z',
-        intelligence: {
-          skills: ['Distributed Systems', 'Cloud Native', 'Go', 'React', 'Kubernetes'],
-          projects: [
-            { name: 'Core Infrastructure Redesign', impact: 'High' },
-            { name: 'Global API Gateway', impact: 'Critical' }
-          ],
-          socialLinks: [
-            { platform: 'GitHub', url: 'https://github.com/sanderson' },
-            { platform: 'LinkedIn', url: '#' }
-          ]
-        }
-      });
-      setIsLoading(false);
-    }, 400);
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await api.get(`/v1/profiles/${id}`);
+        const p = response.data.data;
+        
+        setProfile({
+          id: p.id,
+          name: p.name || 'Anonymous User',
+          email: p.email || 'N/A',
+          location: p.country_id || 'Unknown',
+          industry: p.age_group || 'N/A',
+          avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${p.id}`,
+          role: p.gender === 'male' ? 'Male Participant' : 'Female Participant',
+          score: Math.floor(p.gender_probability * 100),
+          discoveredAt: p.created_at,
+          intelligence: {
+            skills: [p.age_group, p.gender, `Prob: ${p.country_probability}`],
+            projects: [],
+            socialLinks: []
+          }
+        });
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (id) fetchProfile();
   }, [id]);
 
   if (isLoading) return <div className="animate-pulse space-y-8">...</div>;
