@@ -11,7 +11,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifySession = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await api.get<User>('/v1/auth/me');
+      const response = await api.get<User>('/v1/users/me');
       setUser(response.data);
     } catch (error) {
       console.error('Session verification failed:', error);
